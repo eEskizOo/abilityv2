@@ -270,17 +270,19 @@ function ability.OnUpdate()
                 end
                 
                 if not ability.farmer[me] then
-                    ability.farmer[me] = {camp = 1, pos = farm_pos, farmed = false}
+                    ability.farmer[me] = {pos = farm_pos, farmed = false}
                 end
-                if ability.farmer[me].pos[ability.farmer[me].camp] then
-                    local npcs = NPCs.InRadius(ability.farmer[me].pos[ability.farmer[me].camp], 600, Entity.GetTeamNum(me), 0)
-                    if Entity.GetAbsOrigin(me):Distance(ability.farmer[me].pos[ability.farmer[me].camp]):Length2D() < 600 and (not npcs or #npcs == 0 or npcs[1] and (not NPC.IsCreep(npcs[1]) or NPC.IsWaitingToSpawn(npcs[1]))) then
-                        ability.farmer[me].pos[ability.farmer[me].camp] = nil
-                        ability.farmer[me].camp = ability.farmer[me].camp + 1 
+                if ability.farmer[me].pos[1] then
+                    local npcs = NPCs.InRadius(ability.farmer[me].pos[1], 600, Entity.GetTeamNum(me), 0)
+                    if Entity.GetAbsOrigin(me):Distance(ability.farmer[me].pos[1]):Length2D() < 600 and (not npcs or #npcs == 0 or npcs[1] and (not NPC.IsCreep(npcs[1]) or NPC.IsWaitingToSpawn(npcs[1]))) then
+                        ability.farmer[me].pos[1] = ability.farmer[me].pos[9]
+                        if #ability.farmer[me].pos > 0 then
+                            table.sort(ability.farmer[me].pos, function (a, b) return Entity.GetAbsOrigin(me):Distance(b):Length2D() > Entity.GetAbsOrigin(me):Distance(a):Length2D() end)
+                        end
                         ability.farmer[me].farmed = false
                     end
-                    if not ability.farmer[me].farmed and Entity.GetAbsOrigin(me):Distance(ability.farmer[me].pos[ability.farmer[me].camp]):Length2D() > NPC.GetAttackRange(me) then
-                        Player.PrepareUnitOrders(Players.GetLocal(), 3, nil, ability.farmer[me].pos[ability.farmer[me].camp], nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, me, false, true)
+                    if not ability.farmer[me].farmed and Entity.GetAbsOrigin(me):Distance(ability.farmer[me].pos[1]):Length2D() > NPC.GetAttackRange(me) then
+                        Player.PrepareUnitOrders(Players.GetLocal(), 3, nil, ability.farmer[me].pos[1], nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, me, false, true)
                         ability.farmer[me].farmed = true
                     end
                 end
